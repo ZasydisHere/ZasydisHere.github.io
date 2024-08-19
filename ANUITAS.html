@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Perhitungan Anuitas dan Bunga Majemuk</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Perhitungan Anuitas dan Bunga Majemuk</h2>
+
+<form id="calculator">
+    <label for="modal">Masukkan besar modal:</label><br>
+    <input type="number" id="modal" name="modal"><br><br>
+
+    <label for="jenisBunga">Masukkan jenis bunga (m untuk majemuk, t untuk tunggal):</label><br>
+    <input type="text" id="jenisBunga" name="jenisBunga"><br><br>
+
+    <label for="bunga">Masukkan besar bunga (dalam persen):</label><br>
+    <input type="number" id="bunga" name="bunga"><br><br>
+
+    <label for="besarBunga">Bunga per bulan atau per tahun (b/t):</label><br>
+    <input type="text" id="besarBunga" name="besarBunga"><br><br>
+
+    <label for="periode">Masukkan periode (dalam bulan):</label><br>
+    <input type="number" id="periode" name="periode"><br><br>
+
+    <input type="button" value="Hitung" onclick="hitungAnuitas()">
+</form>
+
+<h2>Besar Anuitas: <span id="anuitas"></span></h2>
+
+<table id="tabelPelunasan">
+    <tr>
+        <th>Bulan</th>
+        <th>Utang Awal</th>
+        <th>Anuitas</th>
+        <th>Angsuran Pokok</th>
+        <th>Bunga</th>
+        <th>Sisa Hutang</th>
+    </tr>
+</table>
+
+<script>
+    function hitungAnuitas() {
+        let modal = parseFloat(document.getElementById("modal").value);
+        let jenisBunga = document.getElementById("jenisBunga").value;
+        let bunga = parseFloat(document.getElementById("bunga").value) / 100;
+        let besarBunga = document.getElementById("besarBunga").value;
+        let periode = parseInt(document.getElementById("periode").value);
+
+        if (besarBunga === 't') {
+            bunga /= 12;
+        }
+
+        let anuitas;
+
+        if (jenisBunga === 'm') {
+            anuitas = (modal * bunga) / (1 - Math.pow(1 + bunga, -periode));
+        } else if (jenisBunga === 't') {
+            let totalBunga = modal * bunga * periode;
+            let totalPembayaran = modal + totalBunga;
+            anuitas = totalPembayaran / periode;
+        } else {
+            alert("Jenis bunga tidak valid.");
+            return;
+        }
+
+        document.getElementById("anuitas").textContent = anuitas.toFixed(2);
+
+        tampilkanTabelPelunasan(modal, bunga, periode, anuitas);
+    }
+
+    function tampilkanTabelPelunasan(modal, bunga, periode, anuitas) {
+        let utangAwal = modal;
+        let sisaHutang = modal;
+        let tabel = document.getElementById("tabelPelunasan");
+
+        // Clear existing rows except the header
+        let rows = tabel.rows.length;
+        for (let i = rows - 1; i > 0; i--) {
+            tabel.deleteRow(i);
+        }
+
+        for (let bulan = 1; bulan <= periode; bulan++) {
+            let bungaPerBulan = sisaHutang * bunga;
+            let angsuranPokok = anuitas - bungaPerBulan;
+            sisaHutang -= angsuranPokok;
+
+            let row = tabel.insertRow();
+            row.insertCell(0).textContent = bulan;
+            row.insertCell(1).textContent = utangAwal.toFixed(2);
+            row.insertCell(2).textContent = anuitas.toFixed(2);
+            row.insertCell(3).textContent = angsuranPokok.toFixed(2);
+            row.insertCell(4).textContent = bungaPerBulan.toFixed(2);
+            row.insertCell(5).textContent = sisaHutang.toFixed(2);
+
+            utangAwal = sisaHutang;
+        }
+    }
+</script>
+
+</body>
+</html>
